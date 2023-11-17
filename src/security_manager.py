@@ -43,4 +43,5 @@ class SecurityManager:
     def print_securities(self):
         for security in self.securities:
             print(f"Ticker: {security.ticker} Geometric Mean: {security.geometric_mean_5y}% Adjusted Geometric Mean: {security.adjusted_geometric_mean_5y}%")
+            print(f"Std 5y from yahooquery: {security.std_5y} Std 5t from historical data: {security.std_5y_from_historical_data}")
 

@@ -10,7 +10,9 @@ class Security:
         self.__category_name = self.__fetch_category_name()
         self.__expense_ratio = self.__fetch_expense_ratio()
         self.__dividend_yield = self.__fetch_dividend_yield()
+        self.__historical_data = self.__fetch_historical_data()
         self.__std_5y = self.__fetch_std_5y()
+        self.__std_5y_from_historical_data = self.__fetch_std_5y_from_historical_data()
         self.__geometric_mean_5y = self.__fetch_geometric_mean_5y()
         self.__adjusted_geometric_mean_5y = self.__fetch_adjusted_geometric_mean_5y()
         self.__risk_weight = None
@@ -52,6 +54,12 @@ class Security:
             return round(dividend_yield * 100, 2)
         return dividend_yield
 
+    def __fetch_historical_data(self):
+        ticker_data = yq.Ticker(self.__ticker)
+        historical_data = ticker_data.history(period="5y").xs(self.__ticker, level='symbol')
+        historical_data.index = pd.to_datetime(historical_data.index)  # Convert index to DatetimeIndex
+        return historical_data['close']
+
     def __fetch_std_5y(self):
         etf = yq.Ticker(self.__ticker)
         fund_performance = etf.fund_performance.get(self.__ticker, {})
@@ -60,28 +68,19 @@ class Security:
             return risk_stats[0].get("stdDev", "Unknown")
         return "Unknown"
 
-    def __yearly_return_5y(self):
-        # Create a Ticker object
-        ticker_data = yq.Ticker(self.__ticker)
+    def __fetch_std_5y_from_historical_data(self):
+        if self.__historical_data is not None:
+            yearly_prices = self.__historical_data.resample('Y').last()
+            yearly_returns = yearly_prices.pct_change().dropna()
+            return round(yearly_returns.std() * 100, 2)
+        return "Unknown"
 
-        # Fetch historical data for 5 years
-        historical_data = ticker_data.history(period="5y")
-
-        # Selecting the 'close' price for the IAU ticker
-        iau_data = historical_data.xs(self.__ticker, level='symbol')['close']
-
-        # Ensure the index is in a consistent datetime format
-        iau_data.index = pd.to_datetime(iau_data.index)
-
+    def __fetch_geometric_mean_5y(self):
         # Resample the data to get the last price of each year
-        yearly_prices = iau_data.resample('Y').last()
+        yearly_prices = self.__historical_data.resample('Y').last()
 
         # Calculate yearly returns
         yearly_returns = yearly_prices.pct_change().dropna()
-
-        return yearly_returns
-    def __fetch_geometric_mean_5y(self):
-        yearly_returns = self.__yearly_return_5y()
 
         # Calculate the geometric mean of the returns
         geometric_mean = (yearly_returns + 1).prod() ** (1 / len(yearly_returns)) - 1
@@ -89,7 +88,11 @@ class Security:
         return round(geometric_mean * 100, 2)
 
     def __fetch_adjusted_geometric_mean_5y(self):
-        yearly_returns = self.__yearly_return_5y()
+        # Resample the data to get the last price of each year
+        yearly_prices = self.__historical_data.resample('Y').last()
+
+        # Calculate yearly returns
+        yearly_returns = yearly_prices.pct_change().dropna()
 
         # Adjust yearly returns by adding the dividend yield
         # Assuming self.__dividend_yield is the average annual dividend yield for the security
@@ -131,8 +134,16 @@ class Security:
         return self.__dividend_yield
 
     @property
+    def historical_data(self):
+        return self.__historical_data
+
+    @property
     def std_5y(self):
         return self.__std_5y
+
+    @property
+    def std_5y_from_historical_data(self):
+        return self.__std_5y_from_historical_data
 
     @property
     def geometric_mean_5y(self):
