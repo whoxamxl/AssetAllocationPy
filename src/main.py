@@ -8,5 +8,6 @@ if __name__ == '__main__':
     er = ExcelReader(file_path, sm)
     er.read_and_update_securities()
     sm.print_securities()
+    print(sm.calculate_correlation_matrix())
     ew = ExcelWriter(file_path, sm)
     ew.update_excel()
