@@ -1,5 +1,7 @@
 import yahooquery as yq
 import pandas as pd
+import numpy as np
+from forex_python.converter import CurrencyRates
 
 class Security:
 
@@ -15,6 +17,8 @@ class Security:
         self.__std_5y_from_historical_data = self.__fetch_std_5y_from_historical_data()
         self.__geometric_mean_5y = self.__fetch_geometric_mean_5y()
         self.__adjusted_geometric_mean_5y = self.__fetch_adjusted_geometric_mean_5y()
+        self.__traded_currency = self.__fetch_traded_currency()
+        self.__var_95_USD = self.__calculate_var_monte_carlo()
         self.__risk_weight = None
         self.__asset_weight = None
 
@@ -103,6 +107,43 @@ class Security:
 
         return round(geometric_mean * 100, 2)
 
+    def __fetch_traded_currency(self):
+        etf = yq.Ticker(self.__ticker)
+        return etf.summary_detail.get(self.__ticker, {}).get("currency", "Unknown")
+
+    def __calculate_var_monte_carlo(self, base_currency='USD', time_horizon=252, n_simulations=10000, confidence_level=0.95):
+        if self.__historical_data is not None:
+            # Use adjusted geometric mean as the expected return
+            mean_return = self.__adjusted_geometric_mean_5y / 100 / time_horizon
+
+            # Use historical standard deviation
+            std_return = self.__std_5y_from_historical_data / 100 / np.sqrt(time_horizon)
+
+            # Simulate future price paths
+            simulated_returns = np.random.normal(mean_return, std_return, (time_horizon, n_simulations))
+            simulated_prices = self.__historical_data.iloc[-1] * np.cumprod(1 + simulated_returns, axis=0)
+
+            # Calculate the VaR
+            var_absolute = np.percentile(simulated_prices[-1], (1 - confidence_level) * 100)
+            var_in_local_currency = self.__historical_data.iloc[-1] - var_absolute
+
+            # Fetch the trading currency of the security
+            trading_currency = self.__traded_currency
+
+            # Convert the VaR to the base currency
+            return self.__convert_currency(var_in_local_currency, trading_currency, base_currency)
+
+        else:
+            return "Unknown"
+
+    def __convert_currency(self, amount, from_currency, to_currency):
+        if from_currency != to_currency:
+            currency_converter = CurrencyRates()
+            exchange_rate = currency_converter.get_rate(from_currency, to_currency)
+            return amount * exchange_rate
+        else:
+            return amount
+
     def set_std_5y(self):
         self.__std_5y = self.__fetch_std_5y()
 
@@ -152,6 +193,14 @@ class Security:
     @property
     def adjusted_geometric_mean_5y(self):
         return self.__adjusted_geometric_mean_5y
+
+    @property
+    def var_95_USD(self):
+        return self.__var_95_USD
+
+    @property
+    def traded_currency(self):
+        return self.__traded_currency
 
     @property
     def risk_weight(self):

@@ -35,7 +35,7 @@ class SecurityManager:
             print(
                 f"Ticker: {security.ticker} Geometric Mean: {security.geometric_mean_5y}% Adjusted Geometric Mean: {security.adjusted_geometric_mean_5y}%")
             print(
-                f"Std 5y from yahooquery: {security.std_5y} Std 5t from historical data: {security.std_5y_from_historical_data}")
+                f"Std 5y from yahooquery: {security.std_5y} Std 5t from historical data: {security.std_5y_from_historical_data} VaR 95% in USD: {security.var_95_USD} Traded Currency: {security.traded_currency}")
 
     def calculate_aggregated_data(self):
         # Initialize dictionaries to store raw data for returns and standard deviations
