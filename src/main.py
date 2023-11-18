@@ -13,6 +13,8 @@ if __name__ == '__main__':
     sm.print_securities()
     print(sm.calculate_aggregated_data())
     print(sm.calculate_correlation_matrix())
+    print(sm.calculate_average_historical_data())
+    print(sm.calculate_var_monte_carlo())
     optimizer = CategoryOptimizer(sm)
     optimal_weights_sharpe, _, _ = optimizer.optimize_sharp_ratio()
     optimal_weights_geom_mean, _ = optimizer.optimize_geometric_mean()

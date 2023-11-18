@@ -131,12 +131,13 @@ class Security:
             trading_currency = self.__traded_currency
 
             # Convert the VaR to the base currency
-            return self.__convert_currency(var_in_local_currency, trading_currency, base_currency)
+            return self.convert_currency(var_in_local_currency, trading_currency, base_currency)
 
         else:
             return "Unknown"
 
-    def __convert_currency(self, amount, from_currency, to_currency):
+    @staticmethod
+    def convert_currency(amount, from_currency, to_currency):
         if from_currency != to_currency:
             currency_converter = CurrencyRates()
             exchange_rate = currency_converter.get_rate(from_currency, to_currency)
