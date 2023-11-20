@@ -13,7 +13,7 @@ if __name__ == '__main__':
     sm.print_securities()
     print(sm.calculate_aggregated_data())
     print(sm.calculate_correlation_matrix())
-    # print(sm.calculate_average_historical_data())
+    print(sm.calculate_average_historical_data())
     print("Category 95% VaR: ", sm.calculate_var_monte_carlo())
     print("Current 3-month Treasury Bill Rate: ", round(sm.risk_free_rate, 2), "%")
     print(sm.calculate_adjusted_yearly_returns())

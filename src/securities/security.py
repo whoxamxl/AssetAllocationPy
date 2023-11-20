@@ -62,7 +62,8 @@ class Security:
         ticker_data = yq.Ticker(self.__ticker)
         historical_data = ticker_data.history(period="5y").xs(self.__ticker, level='symbol')
         historical_data.index = pd.to_datetime(historical_data.index)  # Convert index to DatetimeIndex
-        return historical_data['close']
+        resample_historical_data = historical_data['close'].resample('D').last()
+        return resample_historical_data.dropna()
 
     def __fetch_std_5y(self):
         etf = yq.Ticker(self.__ticker)
