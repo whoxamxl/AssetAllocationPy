@@ -4,11 +4,15 @@ from securities.security_type.equity import Equity
 
 import pandas as pd
 import numpy as np
+import yahooquery as yq
+import matplotlib.pyplot as plt
 
 
 class SecurityManager:
+    TBILL_3MONTHS = "^IRX"
     def __init__(self):
         self.securities = []
+        self.risk_free_rate = self.__fetch_risk_free_rate()
 
     def add_security(self, ticker, type):
         if not self.__security_exists(ticker):
@@ -31,6 +35,19 @@ class SecurityManager:
         # Remove security with the specified ticker
         self.securities = [security for security in self.securities if security.ticker != ticker]
 
+    def __fetch_risk_free_rate(self):
+        try:
+            treasury = yq.Ticker(self.TBILL_3MONTHS)
+            data = treasury.history(period='1y')
+
+            if not data.empty and 'close' in data.columns:
+                return data['close'].iloc[-1]
+            else:
+                raise ValueError("Data not available or invalid format")
+        except Exception as e:
+            print(f"Error fetching risk-free rate: {e}")
+            return None
+
     def print_securities(self):
         for security in self.securities:
             print(
@@ -42,6 +59,7 @@ class SecurityManager:
         # Initialize dictionaries to store raw data for returns and standard deviations
         category_returns_data = {}
         category_std_dev_data = {}
+        category_dividend_yield_data = {}
 
         for security in self.securities:
             # Get the category from the type of the security
@@ -51,14 +69,17 @@ class SecurityManager:
             if category not in category_returns_data:
                 category_returns_data[category] = []
                 category_std_dev_data[category] = []
+                category_dividend_yield_data[category] = []
 
             # Append the data for this security to the relevant category
             category_returns_data[category].append(security.adjusted_geometric_mean_5y)
             category_std_dev_data[category].append(security.std_5y)
+            category_dividend_yield_data[category].append(security.dividend_yield)
 
         # Initialize new dictionaries for calculated averages
         category_averages_return = {}
         category_averages_std_dev = {}
+        category_averages_dividend = {}
 
         # Calculate averages for returns and standard deviations for each category
         for category in category_returns_data:
@@ -66,8 +87,10 @@ class SecurityManager:
                 category_returns_data[category]) if category_returns_data[category] else 0
             category_averages_std_dev[category] = sum(category_std_dev_data[category]) / len(
                 category_std_dev_data[category]) if category_std_dev_data[category] else 0
+            category_averages_dividend[category] = sum(category_dividend_yield_data[category]) / len(
+                category_dividend_yield_data[category]) if category_dividend_yield_data[category] else 0
 
-        return category_averages_return, category_averages_std_dev
+        return category_averages_return, category_averages_std_dev, category_averages_dividend
 
     # TODO: historical data currency conversion
     def calculate_average_historical_data(self):
@@ -84,12 +107,92 @@ class SecurityManager:
 
         return category_avg_historical_data
 
+    def plot_category_historical_data(self):
+        category_avg_historical_data = self.calculate_average_historical_data()
+        plt.figure(figsize=(10, 6))  # Set the size of the plot
+
+        # Plot each category
+        for category in category_avg_historical_data.columns:
+            plt.plot(category_avg_historical_data.index, category_avg_historical_data[category], label=category)
+
+        plt.title('Average Historical Data by Category')
+        plt.xlabel('Date')
+        plt.ylabel('Average Value')
+        plt.legend()  # Add a legend to distinguish categories
+        plt.grid(True)  # Add a grid for better readability
+        plt.show()
+
+    def calculate_monthly_returns(self):
+        category_avg_historical_data = self.calculate_average_historical_data()
+
+        # Resample to monthly data - taking the last value of each month
+        monthly_data = category_avg_historical_data.resample('M').last()
+
+        # Calculate month-over-month percentage change
+        monthly_returns = monthly_data.pct_change()
+
+        # Drop the first row which will be NaN
+        monthly_returns = monthly_returns.dropna()
+
+        return monthly_returns
+
+    def calculate_adjusted_yearly_returns(self):
+        category_avg_historical_data = self.calculate_average_historical_data()
+
+        # Resample to yearly data - taking the last value of each year
+        yearly_data = category_avg_historical_data.resample('Y').last()
+
+        # Calculate year-over-year percentage change
+        yearly_returns = yearly_data.pct_change()
+
+        dividend_yields = self.calculate_aggregated_data()[2]
+
+        for category in yearly_returns.columns:
+            if category in dividend_yields:
+                yearly_returns[category] += dividend_yields[category] / 100
+
+        # Drop the first row which will be NaN
+        yearly_returns = yearly_returns.dropna()
+
+        return yearly_returns
+
+    def __calculate_downside_risk(self, returns, mar):
+        excess_returns = np.minimum(0, returns - mar)
+        downside_risk = np.sqrt(np.mean(excess_returns ** 2))
+        return downside_risk
+
+    def calculate_downside_risks(self):
+        monthly_returns = self.calculate_monthly_returns()
+        downside_risks = {}
+
+        annual_MAR = self.risk_free_rate / 100
+        monthly_MAR = (1 + annual_MAR) ** (1 / 12) - 1  # Convert annual rate to monthly
+
+        for category in monthly_returns.columns:
+            category_returns = monthly_returns[category].dropna()
+            downside_risks[category] = self.__calculate_downside_risk(category_returns, monthly_MAR)
+
+        return downside_risks
+
+    def calculate_yearly_downside_risks(self):
+        yearly_returns = self.calculate_adjusted_yearly_returns()
+        downside_risks = {}
+
+        annual_mar = self.risk_free_rate / 100
+        # print(f"Annual MAR: {annual_mar}")
+
+        for category in yearly_returns.columns:
+            category_returns = yearly_returns[category].dropna()
+            downside_risks[category] = self.__calculate_downside_risk(category_returns, annual_mar)
+
+        return downside_risks
+
     def calculate_var_monte_carlo(self, base_currency='USD', time_horizon=252, n_simulations=10000,
                                   confidence_level=0.95):
         average_historical_data = self.calculate_average_historical_data()
         if average_historical_data is not None:
 
-            category_averages_return, category_averages_std_dev = self.calculate_aggregated_data()
+            category_averages_return, category_averages_std_dev, _ = self.calculate_aggregated_data()
             var_results = {}
 
             for category in category_averages_return:
