@@ -11,9 +11,9 @@ class CategoryOptimizer:
 
 
     def convert_to_numpy_array(self):
-        category_averages_return, category_averages_std_dev = self.security_manager.calculate_aggregated_data()
+        category_averages_return, category_averages_std_dev, _ = self.security_manager.calculate_aggregated_data()
         category_vars = self.security_manager.calculate_var_monte_carlo()
-        category_downside_risk = self.security_manager.calculate_downside_risks()
+        category_downside_risk = self.security_manager.calculate_yearly_downside_risks()
 
         # Ensure the order of categories is consistent
         categories = category_averages_return.keys()

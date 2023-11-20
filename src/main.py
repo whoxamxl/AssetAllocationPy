@@ -1,4 +1,6 @@
 from category_optimizer.category_optimizer import CategoryOptimizer
+from category_optimizer.optimizer.sharp_ratio_optimizer import SharpRatioOptimizer
+from category_optimizer.optimizer.sortino_ratio_optimizer import SortinoRatioOptimizer
 from excel.excel_reader import ExcelReader
 from excel.excel_writer import ExcelWriter
 from security_manager import SecurityManager
@@ -11,13 +13,18 @@ if __name__ == '__main__':
     sm.print_securities()
     print(sm.calculate_aggregated_data())
     print(sm.calculate_correlation_matrix())
-    print(sm.calculate_average_historical_data())
+    # print(sm.calculate_average_historical_data())
     print("Category 95% VaR: ", sm.calculate_var_monte_carlo())
     print("Current 3-month Treasury Bill Rate: ", round(sm.risk_free_rate, 2), "%")
     print(sm.calculate_adjusted_yearly_returns())
     print("Category Downside Risks: ", sm.calculate_downside_risks())
     print("Category Yearly Downside Risks: ", sm.calculate_yearly_downside_risks())
     # sm.plot_category_historical_data()
+    sortino_optimizer = SortinoRatioOptimizer(sm)
+    sortino_optimizer.optimize_sortino_ratio(0)
+    sharp_optimizer = SharpRatioOptimizer(sm)
+    sharp_optimizer.optimize_sharp_ratio()
+
 
 
 

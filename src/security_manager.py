@@ -105,7 +105,9 @@ class SecurityManager:
             aggregated_data = pd.concat([sec.historical_data.tz_localize(None) for sec in category_securities], axis=1)
             category_avg_historical_data[category] = aggregated_data.mean(axis=1)
 
-        return category_avg_historical_data
+        resample_category_avg_historical_data = category_avg_historical_data.resample('D').last()
+        resample_category_avg_historical_data = resample_category_avg_historical_data.dropna()
+        return resample_category_avg_historical_data
 
     def plot_category_historical_data(self):
         category_avg_historical_data = self.calculate_average_historical_data()

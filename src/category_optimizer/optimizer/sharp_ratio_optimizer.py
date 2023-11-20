@@ -6,12 +6,12 @@ class SharpRatioOptimizer(CategoryOptimizer):
     def __init__(self, security_manager):
         super().__init__(security_manager)
 
-    def optimize_sharp_ratio(self, risk_free_rate=0.04):
+    def optimize_sharp_ratio(self):
         # Generate random portfolios and their returns and volatilities
         weights, returns, volatilities, _ = self.generate_portfolios()
 
         # Adjust returns for risk-free rate
-        adjusted_returns = returns - risk_free_rate
+        adjusted_returns = returns - (self.security_manager.risk_free_rate / 100)
 
         # Calculate Sharpe Ratios for each portfolio
         sharpe_ratios = adjusted_returns / volatilities
@@ -21,13 +21,14 @@ class SharpRatioOptimizer(CategoryOptimizer):
         optimal_weights = weights[index_max_sharpe]
 
         # Map optimal weights to category names
-        category_names, _, _, _, _ = self.__convert_to_numpy_array()
+        category_names, _, _, _, _, _ = self.convert_to_numpy_array()
         optimal_weights_dict = dict(zip(category_names, optimal_weights))
 
         # Optional: Calculate and return expected return and volatility for the optimal portfolio
         optimal_return = returns[index_max_sharpe]
         optimal_volatility = volatilities[index_max_sharpe]
 
-        print("Optimal Weights (Sharp Ratio):", optimal_weights_dict)
+        print("Optimal Weights (Sharp Ratio): ", optimal_weights_dict)
+        print("Optimal Return (Sharp Ratio): ", optimal_return, "Optimal Volatility (Sharp Ratio): ", optimal_volatility)
 
         return optimal_weights_dict, optimal_return, optimal_volatility
