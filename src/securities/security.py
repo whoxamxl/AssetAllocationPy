@@ -5,8 +5,9 @@ from forex_python.converter import CurrencyRates
 
 class Security:
 
-    def __init__(self, ticker):
+    def __init__(self, ticker, sub_category):
         self.__ticker = ticker
+        self.__sub_category = sub_category
         self.__name = self.__fetch_name()
         self.__exchange_name = self.__fetch_exchange_name()
         self.__category_name = self.__fetch_category_name()
@@ -155,6 +156,10 @@ class Security:
     @property
     def ticker(self):
         return self.__ticker
+
+    @property
+    def sub_category(self):
+        return self.__sub_category
 
     @property
     def name(self):

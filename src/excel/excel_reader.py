@@ -16,15 +16,19 @@ class ExcelReader:
             df = pd.read_excel(xls, sheet_name=sheet_name)
 
             # Check if the DataFrame is empty or does not have the expected column
-            if df.empty or 'Ticker' not in df.columns:
+            if df.empty or 'Ticker' not in df.columns or 'Sub Category' not in df.columns:
                 print(f"Warning: Sheet '{sheet_name}' is empty or does not have the expected format.")
                 continue
 
-            # Assuming tickers are in a column named 'Ticker'
-            for ticker in df['Ticker'].dropna():
-                # Use sheet name as security type
-                self.security_manager.add_security(ticker, sheet_name)
-                current_tickers.add(ticker)  # Update the set with the current ticker
+            # Iterate through each row
+            for _, row in df.iterrows():
+                if pd.notna(row['Ticker']):
+                    ticker = row['Ticker']
+                    sub_category = row['Sub Category'] if pd.notna(row['Sub Category']) else None
+
+                    # Use sheet name as security type, and include sub-category
+                    self.security_manager.add_security(ticker, sub_category, sheet_name)
+                    current_tickers.add(ticker)  # Update the set with the current ticker
 
         # Remove securities not in current_tickers
         securities_to_remove = [security.ticker for security in self.security_manager.securities if security.ticker not in current_tickers]

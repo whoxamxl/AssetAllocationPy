@@ -20,6 +20,7 @@ class ExcelWriter:
                     if type(security).__name__ == security_type:
                         securities_data.append({
                             'Ticker': security.ticker,
+                            'Sub Category': security.sub_category,
                             'Name': security.name,
                             'Exchange Name': security.exchange_name,
                             'Category Name': security.category_name,

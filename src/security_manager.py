@@ -14,15 +14,15 @@ class SecurityManager:
         self.securities = []
         self.risk_free_rate = self.__fetch_risk_free_rate()
 
-    def add_security(self, ticker, type):
+    def add_security(self, ticker, sub_category, type):
         if not self.__security_exists(ticker):
             match type:
                 case "Equity":
-                    self.securities.append(Equity(ticker))
+                    self.securities.append(Equity(ticker, sub_category))
                 case "Bond":
-                    self.securities.append(Bond(ticker))
+                    self.securities.append(Bond(ticker, sub_category))
                 case "Alternative":
-                    self.securities.append(Alternative(ticker))
+                    self.securities.append(Alternative(ticker, sub_category))
                 case _:
                     print("Unknown type.")
         else:
