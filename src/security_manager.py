@@ -28,12 +28,30 @@ class SecurityManager:
         else:
             print(f"Security with ticker {ticker} already exists.")
 
+    def add_securities(self, securities_info):
+        for ticker, sub_category, type in securities_info:
+            if not self.__security_exists(ticker):
+                match type:
+                    case "Equity":
+                        self.securities.append(Equity(ticker, sub_category))
+                    case "Bond":
+                        self.securities.append(Bond(ticker, sub_category))
+                    case "Alternative":
+                        self.securities.append(Alternative(ticker, sub_category))
+                    case _:
+                        print(f"Unknown type for ticker {ticker}.")
+            else:
+                print(f"Security with ticker {ticker} already exists.")
+
     def __security_exists(self, ticker):
         return any(security.ticker == ticker for security in self.securities)
 
     def remove_security(self, ticker):
         # Remove security with the specified ticker
         self.securities = [security for security in self.securities if security.ticker != ticker]
+
+    def remove_securities(self, tickers_to_remove):
+        self.securities = [security for security in self.securities if security.ticker not in tickers_to_remove]
 
     def __fetch_risk_free_rate(self):
         try:
