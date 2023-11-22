@@ -13,6 +13,7 @@ class SecurityManager:
     def __init__(self):
         self.securities = []
         self.risk_free_rate = self.__fetch_risk_free_rate()
+        self.grouped_securities = {}
 
     def add_security(self, ticker, sub_category, type):
         if not self.__security_exists(ticker):
@@ -72,6 +73,28 @@ class SecurityManager:
                 f"Ticker: {security.ticker} Geometric Mean: {security.geometric_mean_5y}% Adjusted Geometric Mean: {security.adjusted_geometric_mean_5y}%")
             print(
                 f"Std 5y from yahooquery: {security.std_5y} Std 5t from historical data: {security.std_5y_from_historical_data} VaR 95% in USD: {security.var_95_USD} Traded Currency: {security.traded_currency}")
+
+    def group_securities(self):
+        grouped = {}
+        for security in self.securities:
+            category = type(security).__name__
+            sub_category = security.sub_category
+
+            if category not in grouped:
+                grouped[category] = {}
+            if sub_category not in grouped[category]:
+                grouped[category][sub_category] = []
+            grouped[category][sub_category].append(security)
+
+        self.grouped_securities = grouped
+
+    def print_grouped_securities(self):
+        formatted_output = {}
+        for category, sub_categories in self.grouped_securities.items():
+            formatted_output[category] = {}
+            for sub_category, securities in sub_categories.items():
+                formatted_output[category][sub_category] = [security.ticker for security in securities]
+        print(formatted_output)
 
     def calculate_aggregated_data(self):
         # Initialize dictionaries to store raw data for returns and standard deviations
