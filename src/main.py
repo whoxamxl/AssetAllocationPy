@@ -62,8 +62,8 @@ if __name__ == '__main__':
     print(adjusted_returns_alternative)
     cov_matrix_alternative, cor_matrix_alternative = optimizer.covariance_correlation_matrix(avg_data)
     print(cor_matrix_alternative)
-    optimizer.optimize_max_sharp_ratio(adjusted_returns_alternative, cov_matrix_alternative, risk_free_rate=sm.risk_free_rate)
-
+    weight_dict, metrics_dict = optimizer.optimize_max_sharp_ratio(adjusted_returns_alternative, cov_matrix_alternative, risk_free_rate=sm.risk_free_rate)
+    print(weight_dict)
 
 
 

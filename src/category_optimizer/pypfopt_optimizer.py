@@ -29,6 +29,13 @@ class Optimizer:
         weights = ef.max_sharpe(risk_free_rate=risk_free_rate)
         cleaned_weights = ef.clean_weights()
         print(cleaned_weights)
-        ef.portfolio_performance(verbose=True, risk_free_rate=risk_free_rate)
-        return cleaned_weights
+        expected_annual_return, annual_volatility, sharp_ratio = ef.portfolio_performance(verbose=True, risk_free_rate=risk_free_rate)
+        print(f"Expected Annual Return: {round(expected_annual_return * 100, 2)}% Annual Volatility: {round(annual_volatility * 100, 2)}% Sharp Ratio: {round(sharp_ratio, 2)}")
+        portfolio_metrics = {
+            "Expected Annual Return": expected_annual_return,
+            "Annual Volatility": annual_volatility,
+            "Sharp Ratio": sharp_ratio
+        }
+        return dict(cleaned_weights), portfolio_metrics
+
 
