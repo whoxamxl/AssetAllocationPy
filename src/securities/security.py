@@ -46,7 +46,7 @@ class Security:
                              .get("annualReportExpenseRatio", "Unknown"))
             if expense_ratio is not None and not isinstance(expense_ratio, str):
                 # Convert the yield to percentage
-                return round(expense_ratio * 100, 2)
+                return round(expense_ratio, 5)
         return "Unknown"
 
     def __fetch_dividend_yield(self):
@@ -56,7 +56,7 @@ class Security:
             dividend_yield = etf.summary_detail.get(self.__ticker, {}).get("yield", "Unknown")
         if dividend_yield is not None and not isinstance(dividend_yield, str):
             # Convert the yield to percentage
-            return round(dividend_yield * 100, 2)
+            return round(dividend_yield, 5)
         return dividend_yield
 
     def __fetch_historical_data(self):
@@ -91,7 +91,7 @@ class Security:
         # Calculate the geometric mean of the returns
         geometric_mean = (yearly_returns + 1).prod() ** (1 / len(yearly_returns)) - 1
 
-        return round(geometric_mean * 100, 2)
+        return round(geometric_mean, 5)
 
     def __fetch_adjusted_geometric_mean_5y(self):
         # Resample the data to get the last price of each year
@@ -102,12 +102,12 @@ class Security:
 
         # Adjust yearly returns by adding the dividend yield
         # Assuming self.__dividend_yield is the average annual dividend yield for the security
-        adjusted_yearly_returns = yearly_returns + self.__dividend_yield / 100
+        adjusted_yearly_returns = yearly_returns + self.__dividend_yield
 
         # Calculate the geometric mean of the adjusted returns
         geometric_mean = (adjusted_yearly_returns + 1).prod() ** (1 / len(adjusted_yearly_returns)) - 1
 
-        return round(geometric_mean * 100, 2)
+        return round(geometric_mean, 5)
 
     def __fetch_traded_currency(self):
         etf = yq.Ticker(self.__ticker)
@@ -116,10 +116,10 @@ class Security:
     def __calculate_var_monte_carlo(self, base_currency='USD', time_horizon=252, n_simulations=10000, confidence_level=0.95):
         if self.__historical_data is not None:
             # Use adjusted geometric mean as the expected return
-            mean_return = self.__adjusted_geometric_mean_5y / 100 / time_horizon
+            mean_return = self.__adjusted_geometric_mean_5y / time_horizon
 
             # Use historical standard deviation
-            std_return = self.__std_5y_from_historical_data / 100 / np.sqrt(time_horizon)
+            std_return = self.__std_5y_from_historical_data / np.sqrt(time_horizon)
 
             # Simulate future price paths
             simulated_returns = np.random.normal(mean_return, std_return, (time_horizon, n_simulations))

@@ -60,7 +60,7 @@ class SecurityManager:
             data = treasury.history(period='1y')
 
             if not data.empty and 'close' in data.columns:
-                return data['close'].iloc[-1]
+                return round(data['close'].iloc[-1] / 100, 2)
             else:
                 raise ValueError("Data not available or invalid format")
         except Exception as e:
@@ -72,7 +72,7 @@ class SecurityManager:
             print(
                 f"Ticker: {security.ticker} Geometric Mean: {security.geometric_mean_5y}% Adjusted Geometric Mean: {security.adjusted_geometric_mean_5y}%")
             print(
-                f"Std 5y from yahooquery: {security.std_5y} Std 5t from historical data: {security.std_5y_from_historical_data} VaR 95% in USD: {security.var_95_USD} Traded Currency: {security.traded_currency}")
+                f"Std 5y from yahooquery: {security.std_5y} Std 5t from historical data: {security.std_5y_from_historical_data} Dividend: {security.dividend_yield} VaR 95% in USD: {security.var_95_USD} Traded Currency: {security.traded_currency}")
 
     def group_securities(self):
         grouped = {}

@@ -6,6 +6,7 @@ from category_optimizer.pypfopt_optimizer import Optimizer
 from excel.excel_reader import ExcelReader
 from excel.excel_writer import ExcelWriter
 from security_manager import SecurityManager
+from aggregated_data_calculator import AggregatedDataCalculator
 import pandas as pd
 
 if __name__ == '__main__':
@@ -36,8 +37,8 @@ if __name__ == '__main__':
     category_historical_data = sm.calculate_average_historical_data()
     category_returns = pd.Series(category_returns_dict)
     category_dividend = pd.Series(category_dividend_dict)
-    category_returns = category_returns / 100
-    category_dividend = category_dividend / 100
+    category_returns = category_returns
+    category_dividend = category_dividend
     yearly_prices = category_historical_data.resample('Y').last()
     yearly_returns = yearly_prices.pct_change().dropna()
     std = round(yearly_returns.std() * 100, 2)
@@ -49,8 +50,19 @@ if __name__ == '__main__':
     cov_matrix, cor_matrix = optimizer.covariance_correlation_matrix(category_historical_data)
     print(cor_matrix)
 
-    optimizer.optimize_max_sharp_ratio(total_returns, cov_matrix, risk_free_rate=sm.risk_free_rate / 100)
+    optimizer.optimize_max_sharp_ratio(total_returns, cov_matrix, risk_free_rate=sm.risk_free_rate)
 
+    # TODO: check with foreign security and with asset weight (Form: 0.11)
+    # TODO: optimizer constraints
+    adc = AggregatedDataCalculator()
+    avg_data = adc.calculate_average_historical_data(sm.grouped_securities["Alternative"])
+    print(avg_data)
+    print(adc.mean_historical_returns(avg_data))
+    adjusted_returns_alternative = adc.calculate_average_adjusted_returns(sm.grouped_securities["Alternative"], avg_data)
+    print(adjusted_returns_alternative)
+    cov_matrix_alternative, cor_matrix_alternative = optimizer.covariance_correlation_matrix(avg_data)
+    print(cor_matrix_alternative)
+    optimizer.optimize_max_sharp_ratio(adjusted_returns_alternative, cov_matrix_alternative, risk_free_rate=sm.risk_free_rate)
 
 
 
