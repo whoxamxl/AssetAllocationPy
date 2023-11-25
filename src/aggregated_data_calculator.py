@@ -71,7 +71,7 @@ class AggregatedDataCalculator:
         end_date = pd.to_datetime(end_date)
 
         # Iterate over the date range and collect rates
-        date_range = pd.date_range(start=start_date, end=end_date, freq='D')
+        date_range = pd.date_range(start=start_date, end=end_date, freq='M')
         for date in date_range:
             try:
                 rate = currency_converter.get_rate(from_currency, AggregatedDataCalculator.BASE_CURRENCY, date)
