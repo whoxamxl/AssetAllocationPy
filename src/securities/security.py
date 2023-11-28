@@ -25,11 +25,17 @@ class Security:
 
     def __fetch_name(self):
         etf = yq.Ticker(self.__ticker)
-        return etf.quote_type.get(self.__ticker, {}).get("longName", "Unknown")
+        ticker_quote_type = etf.quote_type.get(self.__ticker, {})
+        if isinstance(ticker_quote_type, dict):
+            return ticker_quote_type.get('shortName', "Unknown")
+        return "Unknown"
 
     def __fetch_exchange_name(self):
         etf = yq.Ticker(self.__ticker)
-        return etf.price.get(self.__ticker, {}).get("exchangeName", "Unknown")
+        ticker_price = etf.price.get(self.__ticker, {})
+        if isinstance(ticker_price, dict):
+            return ticker_price.get('exchangeName', "Unknown")
+        return "Unknown"
 
     def __fetch_category_name(self):
         etf = yq.Ticker(self.__ticker)
@@ -55,7 +61,6 @@ class Security:
         if dividend_yield == "Unknown":
             dividend_yield = etf.summary_detail.get(self.__ticker, {}).get("yield", "Unknown")
         if dividend_yield is not None and not isinstance(dividend_yield, str):
-            # Convert the yield to percentage
             return round(dividend_yield, 5)
         return dividend_yield
 
