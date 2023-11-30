@@ -22,13 +22,18 @@ class ExcelWriter:
                             'Ticker': security.ticker,
                             'Sub Category': security.sub_category,
                             'Name': security.name,
-                            'Exchange Name': security.exchange_name,
                             'Category Name': security.category_name,
-                            'Expense Ratio': security.expense_ratio,
-                            'Dividend Yield': security.dividend_yield,
-                            '5y Std Dev': security.std_5y,
-                            'Risk Weight': security.risk_weight,
-                            'Asset Weight': security.asset_weight
+                            'Exchange Name': security.exchange_name,
+                            'Traded Currency': security.traded_currency,
+                            'Expense Ratio': round(security.expense_ratio * 100, 4),
+                            'Dividend Yield': round(security.dividend_yield * 100, 2),
+                            'Simple Return': round(security.geometric_mean_5y * 100, 2),
+                            'Total Return': round(security.adjusted_geometric_mean_5y * 100, 2),
+                            'Standard Deviation': round(security.standard_deviation_5y * 100, 2),
+                            'Downside Deviation': round(security.downside_deviation_5y * 100, 2),
+                            'Value at Risk 95%': round(security.var_95 * 100, 2),
+                            'Sharpe Ratio': security.sharpe_ratio,
+                            'Asset Weight': security.asset_weight,
                         })
 
                 updated_data[security_type] = pd.DataFrame(securities_data)
@@ -45,5 +50,3 @@ class ExcelWriter:
 
         except Exception as e:
             print(f"An error occurred: {e}")
-
-# Usage remains the same

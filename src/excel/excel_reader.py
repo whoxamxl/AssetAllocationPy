@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class ExcelReader:
     def __init__(self, file_path, security_manager):
         self.file_path = file_path
@@ -22,13 +23,15 @@ class ExcelReader:
                 continue
 
             # Add securities in bulk
-            securities = df.apply(lambda row: (row['Ticker'], row['Sub Category'] if pd.notna(row['Sub Category']) else None, sheet_name), axis=1)
-            self.security_manager.add_securities(securities.tolist())  # Assuming add_securities can handle a list of tuples
+            securities = df.apply(
+                lambda row: (row['Ticker'], row['Sub Category'] if pd.notna(row['Sub Category']) else None, sheet_name),
+                axis=1)
+            self.security_manager.add_securities(
+                securities.tolist())  # Assuming add_securities can handle a list of tuples
             current_tickers.update(df['Ticker'])
 
         # Efficient removal of securities not in current_tickers
         all_tickers = set(security.ticker for security in self.security_manager.securities)
         securities_to_remove = all_tickers - current_tickers
-        self.security_manager.remove_securities(list(securities_to_remove))  # Assuming remove_securities can handle a list
-
-
+        self.security_manager.remove_securities(
+            list(securities_to_remove))  # Assuming remove_securities can handle a list

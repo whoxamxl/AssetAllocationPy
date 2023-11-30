@@ -359,3 +359,7 @@ class Security:
         if self.__sharpe_ratio is None:
             self.__sharpe_ratio = self.__calculate_sharpe_ratio()
         return self.__sharpe_ratio
+
+    @property
+    def asset_weight(self):
+        return self.__asset_weight
