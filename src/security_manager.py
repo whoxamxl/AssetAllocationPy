@@ -96,3 +96,23 @@ class SecurityManager:
                 formatted_output[category][sub_category] = [security.ticker for security in securities]
         print(formatted_output)
 
+
+    def aggregate_returns_in_series(self):
+        aggregated_returns = pd.DataFrame()
+        for security in self.securities:
+            aggregated_returns[security.ticker] = security.returns_in_series_5y
+
+        interpolated_returns = aggregated_returns.interpolate()
+        filled_returns = interpolated_returns.apply(lambda x: x.fillna(x.mean()), axis=0)
+
+        return filled_returns
+
+    def aggregate_monthly_returns_in_series(self):
+        aggregated_returns = pd.DataFrame()
+        for security in self.securities:
+            aggregated_returns[security.ticker] = security.monthly_returns_in_series_5y
+
+        interpolated_returns = aggregated_returns.interpolate()
+        filled_returns = interpolated_returns.apply(lambda x: x.fillna(x.mean()), axis=0)
+
+        return filled_returns

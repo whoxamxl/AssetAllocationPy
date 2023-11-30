@@ -3,6 +3,7 @@ from category_security_manager import CategorySecurityManager
 from excel.excel_reader import ExcelReader
 from excel.excel_writer import ExcelWriter
 from pypfopt_optimizer.mean_variance_optimizer import MeanVarianceOptimizer
+from riskfolio_optimizer.nested_clustered_optimizer import NestedClusteredOptimizer
 from security_manager import SecurityManager
 from aggregated_data_calculator import AggregatedDataCalculator
 import pandas as pd
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     # print(all_historical_data.to_string())
     # print(all_returns)
     all_cov_matrix, all_cor_matrix = optimizer.covariance_correlation_matrix(all_historical_data)
-    all_weight_dict, all_metrics_dict = optimizer.optimize_max_sharpe_ratio(all_returns, all_cov_matrix, risk_free_rate=sm.risk_free_rate, constraints_dict={})
+    all_weight_dict, all_metrics_dict = optimizer.optimize_max_sharpe_ratio(all_returns, all_cov_matrix, risk_free_rate=0, constraints_dict={"Alternative_max": 0.2})
 
     def plot_category_historical_data(self, historical_data):
         plt.figure(figsize=(10, 6))  # Set the size of the plot
@@ -63,6 +64,11 @@ if __name__ == '__main__':
         plt.grid(True)  # Add a grid for better readability
         plt.show()
 
+    # print(sm.aggregate_returns_in_series())
+    print(sm.aggregate_monthly_returns_in_series().to_string())
+
+    nco = NestedClusteredOptimizer()
+    nco.optimize(sm.aggregate_monthly_returns_in_series(), risk_free_rate=0)
 
 
 

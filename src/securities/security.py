@@ -18,6 +18,8 @@ class Security:
         self.__std_5y_from_historical_data = self.__fetch_std_5y_from_historical_data()
         self.__geometric_mean_5y = self.__fetch_geometric_mean_5y()
         self.__adjusted_geometric_mean_5y = self.__fetch_adjusted_geometric_mean_5y()
+        self.__returns_in_series_5y = self.__calculate_returns_in_series_5y()
+        self.__monthly_returns_in_series_5y = self.__calculate_monthly_returns_in_series_5y()
         self.__traded_currency = self.__fetch_traded_currency()
         self.__var_95_USD = self.__calculate_var_monte_carlo()
         self.__risk_weight = None
@@ -114,6 +116,32 @@ class Security:
 
         return round(geometric_mean, 5)
 
+    def __calculate_returns_in_series_5y(self):
+        # Resample the data to get the last price of each year
+        yearly_prices = self.__historical_data.resample('Y').last()
+
+        # Calculate yearly returns
+        yearly_returns = yearly_prices.pct_change().dropna()
+
+        # Adjust yearly returns by adding the dividend yield
+        # Assuming self.__dividend_yield is the average annual dividend yield for the security
+        adjusted_yearly_returns = yearly_returns + self.__dividend_yield
+
+        return round(adjusted_yearly_returns, 5)
+
+    def __calculate_monthly_returns_in_series_5y(self):
+        # Resample the data to get the last price of each month
+        monthly_prices = self.__historical_data.resample('D').last()
+
+        # Calculate monthly returns
+        monthly_returns = monthly_prices.pct_change().dropna()
+
+        # Adjust monthly returns by adding the dividend yield
+        # Assuming self.__dividend_yield is the average annual dividend yield for the security
+        adjusted_monthly_returns = monthly_returns + (self.__dividend_yield / 252)
+
+        return round(adjusted_monthly_returns, 5)
+
     def __fetch_traded_currency(self):
         etf = yq.Ticker(self.__ticker)
         return etf.summary_detail.get(self.__ticker, {}).get("currency", "Unknown")
@@ -205,6 +233,14 @@ class Security:
     @property
     def adjusted_geometric_mean_5y(self):
         return self.__adjusted_geometric_mean_5y
+
+    @property
+    def returns_in_series_5y(self):
+        return self.__returns_in_series_5y
+
+    @property
+    def monthly_returns_in_series_5y(self):
+        return self.__monthly_returns_in_series_5y
 
     @property
     def var_95_USD(self):
