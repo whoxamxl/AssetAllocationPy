@@ -19,7 +19,7 @@ class CategorySecurity:
         weighted_averages = pd.DataFrame()
         for sub_category, weight in self.sub_category_weights.items():
             if sub_category in self.sub_category_historical_data:
-                # Resample sub-category data
+                # Resample sub-categories data
                 resampled_data = self.sub_category_historical_data[sub_category].resample('D').last().dropna()
                 weighted_averages[sub_category] = resampled_data * weight
 
@@ -36,9 +36,9 @@ class CategorySecurity:
     def print_category_security(self):
         print("-----------------------------------")
         print(f"Category: {self.category}")
-        print("Sub-category Weights:", self.sub_category_weights)
-        print("Sub-category Metrics:", self.sub_category_metrics)
-        print("Sub-category Historical Data:", self.sub_category_historical_data)
+        print("Sub-categories Weights:", self.sub_category_weights)
+        print("Sub-categories Metrics:", self.sub_category_metrics)
+        print("Sub-categories Historical Data:", self.sub_category_historical_data)
         print("Historical Data:", self.historical_data)
         print("Average Return:", self.average_return)
         print("-----------------------------------")

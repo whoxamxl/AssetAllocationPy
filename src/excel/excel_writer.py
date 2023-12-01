@@ -1,10 +1,9 @@
 import pandas as pd
 
-
 class ExcelWriter:
-    def __init__(self, file_path, security_manager):
+    def __init__(self, file_path, all_category):
         self.file_path = file_path
-        self.security_manager = security_manager
+        self.all_category = all_category
 
     def update_excel(self):
         try:
@@ -14,10 +13,10 @@ class ExcelWriter:
 
             # Update data
             updated_data = {}
-            for security_type in set(type(s).__name__ for s in self.security_manager.securities):
+            for category in self.all_category.categories:
                 securities_data = []
-                for security in self.security_manager.securities:
-                    if type(security).__name__ == security_type:
+                for subcategory in category.subcategories:
+                    for security in subcategory.securities:
                         securities_data.append({
                             'Ticker': security.ticker,
                             'Sub Category': security.sub_category,
@@ -36,7 +35,8 @@ class ExcelWriter:
                             'Asset Weight': security.asset_weight,
                         })
 
-                updated_data[security_type] = pd.DataFrame(securities_data)
+                if securities_data:
+                    updated_data[category.name] = pd.DataFrame(securities_data)
 
             # Write updated data to file
             with pd.ExcelWriter(self.file_path, engine='openpyxl') as writer:

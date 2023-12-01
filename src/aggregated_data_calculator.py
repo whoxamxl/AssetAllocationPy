@@ -111,7 +111,7 @@ class AggregatedDataCalculator:
             if not securities:
                 continue
 
-            # Equal weighted average: Simply take the dividend yield of each security
+            # Equal weighted average: Simply take the dividend yield of each securities
             dividend_yields = [sec.dividend_yield for sec in securities]
             category_avg_dividend[category] = np.mean(dividend_yields)
 

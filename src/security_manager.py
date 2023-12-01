@@ -48,7 +48,7 @@ class SecurityManager:
         return any(security.ticker == ticker for security in self.securities)
 
     def remove_security(self, ticker):
-        # Remove security with the specified ticker
+        # Remove securities with the specified ticker
         self.securities = [security for security in self.securities if security.ticker != ticker]
 
     def remove_securities(self, tickers_to_remove):

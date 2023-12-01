@@ -1,4 +1,4 @@
-from category.sub_category.sub_category import SubCategory
+from categories.sub_categories.sub_category import SubCategory
 
 
 class Category:
@@ -15,3 +15,7 @@ class Category:
             subcategory = SubCategory(subcategory_name)
             self.subcategories.append(subcategory)
         return subcategory
+
+    def add_security_to_subcategory(self, security, subcategory_name):
+        subcategory = self.find_or_create_subcategory(subcategory_name)
+        subcategory.add_security(security)

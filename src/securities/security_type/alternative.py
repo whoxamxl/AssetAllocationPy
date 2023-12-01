@@ -1,4 +1,4 @@
-from ..security import Security
+from categories.sub_categories.securities.security import Security
 
 class Alternative (Security):
     class_risk_weight = None

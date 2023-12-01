@@ -1,4 +1,4 @@
-from securities.security import Security
+from categories.sub_categories.securities.security import Security
 
 
 class SubCategory:
