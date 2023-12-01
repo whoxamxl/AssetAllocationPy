@@ -9,6 +9,45 @@ from security_manager import SecurityManager
 from aggregated_data_calculator import AggregatedDataCalculator
 import pandas as pd
 
+
+def plot_category_historical_data(historical_data):
+    plt.figure(figsize=(10, 6))  # Set the size of the plot
+
+    # Plot each category
+    for category in historical_data.columns:
+        plt.plot(historical_data.index, historical_data[category], label=category)
+
+    plt.title('Average Historical Data by Category')
+    plt.xlabel('Date')
+    plt.ylabel('Average Value')
+    plt.legend()  # Add a legend to distinguish categories
+    plt.grid(True)  # Add a grid for better readability
+    plt.show()
+
+def plot_returns(returns_filled_df):
+    # Number of tickers
+    num_tickers = len(returns_filled_df.columns)
+
+    # Create a figure and a set of subplots
+    fig, axs = plt.subplots(num_tickers, 1, figsize=(15, 5 * num_tickers))
+
+    # Check if there's only one subplot (in case of a single ticker)
+    if num_tickers == 1:
+        axs = [axs]
+
+    # Plot each ticker in a separate subplot
+    for i, ticker in enumerate(returns_filled_df.columns):
+        axs[i].plot(returns_filled_df.index, returns_filled_df[ticker])
+        axs[i].set_title(f'Returns of {ticker}')
+        axs[i].set_xlabel('Date')
+        axs[i].set_ylabel('Returns')
+
+    # Adjust layout to prevent overlapping
+    plt.tight_layout()
+
+    # Show the plot
+    plt.show()
+
 if __name__ == '__main__':
     sm = SecurityManager()
     file_path = "ETF.xlsx"
@@ -19,13 +58,14 @@ if __name__ == '__main__':
 
     optimizer = MeanVarianceOptimizer()
 
+    print(f"Risk Free Rate: {Security.get_risk_free_rate() * 100}%")
     adc = AggregatedDataCalculator()
     csm = CategorySecurityManager()
     for category in sm.grouped_securities:
         avg_data = adc.calculate_average_historical_data(sm.grouped_securities[category])
         adjsuted_returns = adc.calculate_average_adjusted_returns(sm.grouped_securities[category], avg_data)
         cov_matrix, cor_matrix = optimizer.covariance_correlation_matrix(avg_data)
-        weight_dict, metrics_dict = optimizer.optimize_max_sharpe_ratio(adjsuted_returns, cov_matrix, risk_free_rate=Security.get_risk_free_rate())
+        weight_dict, metrics_dict = optimizer.optimize_max_sharpe_ratio(adjsuted_returns, cov_matrix, risk_free_rate=0)
 
         csm.add_category_security(category, weight_dict, avg_data, metrics_dict)
 
@@ -48,26 +88,13 @@ if __name__ == '__main__':
     all_cov_matrix, all_cor_matrix = optimizer.covariance_correlation_matrix(all_historical_data)
     all_weight_dict, all_metrics_dict = optimizer.optimize_max_sharpe_ratio(all_returns, all_cov_matrix, risk_free_rate=0, constraints_dict={"Alternative_max": 0.2})
 
-    def plot_category_historical_data(self, historical_data):
-        plt.figure(figsize=(10, 6))  # Set the size of the plot
 
-        # Plot each category
-        for category in historical_data.columns:
-            plt.plot(historical_data.index, historical_data[category], label=category)
-
-        plt.title('Average Historical Data by Category')
-        plt.xlabel('Date')
-        plt.ylabel('Average Value')
-        plt.legend()  # Add a legend to distinguish categories
-        plt.grid(True)  # Add a grid for better readability
-        plt.show()
-
-    print(sm.aggregate_returns_in_series())
-    # print(sm.aggregate_returns_in_series().to_string())
-
+    # print(sm.aggregate_returns_in_series())
+    print(sm.aggregate_returns_in_series().to_string())
+    # returns_filled_df = sm.aggregate_returns_in_series()
     # nco = NestedClusteredOptimizer()
     # nco.optimize(sm.aggregate_returns_in_series(), risk_free_rate=0)
-
+    plot_returns(sm.aggregate_returns_in_series())
 
 
     ew = ExcelWriter(file_path, sm)

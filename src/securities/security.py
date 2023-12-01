@@ -2,10 +2,24 @@ import yahooquery as yq
 import pandas as pd
 import numpy as np
 from functools import lru_cache
+from retrying import retry
 
+class DataFetchError(Exception):
+    """ Custom exception for data fetch errors """
+    pass
+
+class NaNDataError(DataFetchError):
+    """ Exception raised when data has too many NaN values """
+    pass
+
+class DuplicatedDataError(DataFetchError):
+    """ Exception raised when data has too many duplicated values """
+    pass
 
 class Security:
     TBILL_3MONTHS = "^IRX"
+    NAN_THRESHOLD = 0.1
+    DUPLICATED_THRESHOLD = 0.1
     _risk_free_rate = None
 
     @classmethod
@@ -21,7 +35,7 @@ class Security:
             data = treasury.history(period='1y')
 
             if not data.empty and 'close' in data.columns:
-                return round(data['close'].iloc[-1] / 100, 2)
+                return round(data['close'].iloc[-1] / 100, 5)
             else:
                 raise ValueError("Data not available or invalid format")
         except Exception as e:
@@ -121,17 +135,37 @@ class Security:
             print(f"Error fetching dividend yield for {self.__ticker}: {e}")
             return None
 
+    def __is_data_valid(self, data, ticker):
+        # Check for a significant amount of NaN values
+        if data.isna().sum() / len(data) > Security.NAN_THRESHOLD:  # Example threshold for NaN values
+            raise NaNDataError(f"{ticker} contains too many NaN values: {data.isna().sum()} out of {len(data)}")
+
+        # Check for duplicated values
+        if data.duplicated().sum() / len(data) > Security.DUPLICATED_THRESHOLD:
+            raise DuplicatedDataError(
+                f"{ticker} contains too many duplicated values: {data.duplicated().sum()} out of {len(data)}")
+
+        return True
+
     @lru_cache(maxsize=None)
+    @retry(stop_max_attempt_number=3, wait_fixed=1000, retry_on_exception=lambda e: isinstance(e, DataFetchError))
     def __fetch_historical_data(self):
         try:
             historical_data = self.__etf.history(period="5y").xs(self.__ticker, level='symbol')
             historical_data.index = pd.to_datetime(historical_data.index)  # Convert index to DatetimeIndex
             resample_historical_data = historical_data['close'].resample('D').last()
             resample_historical_data.interpolate(method='pchip', inplace=True)
+
+            # This will now raise specific exceptions if the data is invalid
+            self.__is_data_valid(resample_historical_data, self.__ticker)
+
             return resample_historical_data.dropna()
+        except (NaNDataError, DuplicatedDataError) as e:
+            print(f"Validation failed for {self.__ticker}: {e}")
+            raise  # Reraise the specific validation exception to trigger a retry
         except Exception as e:
             print(f"Error fetching historical data for {self.__ticker}: {e}")
-            return None
+            raise  # Reraise any other exceptions
 
     def __check_historical_data(self):
         historical_data = self.historical_data

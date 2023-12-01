@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import yahooquery as yq
 import matplotlib.pyplot as plt
+from sklearn.impute import KNNImputer
 
 
 class SecurityManager:
@@ -79,7 +80,27 @@ class SecurityManager:
         for security in self.securities:
             aggregated_returns[security.ticker] = security.adjusted_returns_in_series_5y
 
-        interpolated_returns = aggregated_returns.interpolate()
-        filled_returns = interpolated_returns.apply(lambda x: x.fillna(x.mean()), axis=0)
+        filled_returns = self.fill_missing_dataframe_knn(aggregated_returns)
+
 
         return filled_returns
+
+    def fill_missing_dataframe_knn(self, returns_dataframe):
+        # Identify columns that are entirely NaN
+        nan_columns = returns_dataframe.columns[returns_dataframe.isnull().all()].tolist()
+
+        # Check if there are any such columns and raise an error with their names
+        if nan_columns:
+            raise ValueError(f"Columns entirely NaN: {', '.join(nan_columns)}")
+
+        # Initialize the KNN Imputer
+        imputer = KNNImputer(n_neighbors=5)
+
+        # Impute the missing values
+        returns_filled = imputer.fit_transform(returns_dataframe)
+
+        # Convert the filled array back to a DataFrame
+        returns_filled_df = pd.DataFrame(returns_filled, columns=returns_dataframe.columns,
+                                         index=returns_dataframe.index)
+
+        return returns_filled_df
