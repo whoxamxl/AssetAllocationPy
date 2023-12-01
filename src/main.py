@@ -4,6 +4,7 @@ from excel.excel_reader import ExcelReader
 from excel.excel_writer import ExcelWriter
 from pypfopt_optimizer.mean_variance_optimizer import MeanVarianceOptimizer
 from riskfolio_optimizer.nested_clustered_optimizer import NestedClusteredOptimizer
+from securities.security import Security
 from security_manager import SecurityManager
 from aggregated_data_calculator import AggregatedDataCalculator
 import pandas as pd
@@ -13,21 +14,18 @@ if __name__ == '__main__':
     file_path = "ETF.xlsx"
     er = ExcelReader(file_path, sm)
     er.read_and_update_securities()
-    sm.print_securities()
     sm.group_securities()
     sm.print_grouped_securities()
 
     optimizer = MeanVarianceOptimizer()
 
-    # TODO: check with foreign security and with asset weight (Form: 0.11)
-    # TODO: pypfopt_optimizer constraints
     adc = AggregatedDataCalculator()
     csm = CategorySecurityManager()
     for category in sm.grouped_securities:
         avg_data = adc.calculate_average_historical_data(sm.grouped_securities[category])
         adjsuted_returns = adc.calculate_average_adjusted_returns(sm.grouped_securities[category], avg_data)
         cov_matrix, cor_matrix = optimizer.covariance_correlation_matrix(avg_data)
-        weight_dict, metrics_dict = optimizer.optimize_max_sharpe_ratio(adjsuted_returns, cov_matrix, risk_free_rate=sm.risk_free_rate)
+        weight_dict, metrics_dict = optimizer.optimize_max_sharpe_ratio(adjsuted_returns, cov_matrix, risk_free_rate=Security.get_risk_free_rate())
 
         csm.add_category_security(category, weight_dict, avg_data, metrics_dict)
 
@@ -64,11 +62,11 @@ if __name__ == '__main__':
         plt.grid(True)  # Add a grid for better readability
         plt.show()
 
-    # print(sm.aggregate_returns_in_series())
-    print(sm.aggregate_monthly_returns_in_series().to_string())
+    print(sm.aggregate_returns_in_series())
+    # print(sm.aggregate_returns_in_series().to_string())
 
-    nco = NestedClusteredOptimizer()
-    nco.optimize(sm.aggregate_monthly_returns_in_series(), risk_free_rate=0)
+    # nco = NestedClusteredOptimizer()
+    # nco.optimize(sm.aggregate_returns_in_series(), risk_free_rate=0)
 
 
 

@@ -9,10 +9,8 @@ import matplotlib.pyplot as plt
 
 
 class SecurityManager:
-    TBILL_3MONTHS = "^IRX"
     def __init__(self):
         self.securities = []
-        self.risk_free_rate = self.__fetch_risk_free_rate()
         self.grouped_securities = {}
 
     def add_security(self, ticker, sub_category, type):
@@ -53,27 +51,6 @@ class SecurityManager:
 
     def remove_securities(self, tickers_to_remove):
         self.securities = [security for security in self.securities if security.ticker not in tickers_to_remove]
-
-    def __fetch_risk_free_rate(self):
-        try:
-            treasury = yq.Ticker(self.TBILL_3MONTHS)
-            data = treasury.history(period='1y')
-
-            if not data.empty and 'close' in data.columns:
-                return round(data['close'].iloc[-1] / 100, 2)
-            else:
-                raise ValueError("Data not available or invalid format")
-        except Exception as e:
-            print(f"Error fetching risk-free rate: {e}")
-            return None
-
-    def print_securities(self):
-        for security in self.securities:
-            print(
-                f"Ticker: {security.ticker} Geometric Mean: {security.geometric_mean_5y}% Adjusted Geometric Mean: {security.adjusted_geometric_mean_5y}%")
-            print(
-                f"Std 5y from yahooquery: {security.std_5y} Std 5t from historical data: {security.std_5y_from_historical_data} Dividend: {security.dividend_yield} VaR 95% in USD: {security.var_95_USD} Traded Currency: {security.traded_currency}")
-
     def group_securities(self):
         grouped = {}
         for security in self.securities:
@@ -100,17 +77,7 @@ class SecurityManager:
     def aggregate_returns_in_series(self):
         aggregated_returns = pd.DataFrame()
         for security in self.securities:
-            aggregated_returns[security.ticker] = security.returns_in_series_5y
-
-        interpolated_returns = aggregated_returns.interpolate()
-        filled_returns = interpolated_returns.apply(lambda x: x.fillna(x.mean()), axis=0)
-
-        return filled_returns
-
-    def aggregate_monthly_returns_in_series(self):
-        aggregated_returns = pd.DataFrame()
-        for security in self.securities:
-            aggregated_returns[security.ticker] = security.monthly_returns_in_series_5y
+            aggregated_returns[security.ticker] = security.adjusted_returns_in_series_5y
 
         interpolated_returns = aggregated_returns.interpolate()
         filled_returns = interpolated_returns.apply(lambda x: x.fillna(x.mean()), axis=0)
