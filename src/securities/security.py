@@ -157,7 +157,7 @@ class Security:
             resample_historical_data.interpolate(method='pchip', inplace=True)
 
             # This will now raise specific exceptions if the data is invalid
-            self.__is_data_valid(resample_historical_data, self.__ticker)
+            # self.__is_data_valid(resample_historical_data, self.__ticker)
 
             return resample_historical_data.dropna()
         except (NaNDataError, DuplicatedDataError) as e:

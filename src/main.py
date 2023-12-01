@@ -90,12 +90,14 @@ if __name__ == '__main__':
 
 
     # print(sm.aggregate_returns_in_series())
-    print(sm.aggregate_returns_in_series().to_string())
+    # print(sm.aggregate_returns_in_series().to_string())
     # returns_filled_df = sm.aggregate_returns_in_series()
     # nco = NestedClusteredOptimizer()
     # nco.optimize(sm.aggregate_returns_in_series(), risk_free_rate=0)
-    plot_returns(sm.aggregate_returns_in_series())
+    # plot_returns(sm.aggregate_returns_in_series())
 
 
     ew = ExcelWriter(file_path, sm)
     ew.update_excel()
+
+    sm.add_securities_to_category()

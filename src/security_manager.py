@@ -1,3 +1,4 @@
+from all_category import AllCategory
 from securities.security_type.alternative import Alternative
 from securities.security_type.bond import Bond
 from securities.security_type.equity import Equity
@@ -104,3 +105,8 @@ class SecurityManager:
                                          index=returns_dataframe.index)
 
         return returns_filled_df
+
+    def add_securities_to_category(self):
+        all_category = AllCategory()
+        for security in self.securities:
+            all_category.add_security(security)
