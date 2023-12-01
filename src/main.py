@@ -51,6 +51,10 @@ if __name__ == '__main__':
     file_path = "ETF.xlsx"
     er = ExcelReader(file_path, al)
     er.read_and_update_securities()
+    # Check sub-category weights
+    if not al.check_subcategory_weights():
+        raise ValueError("Sub-category weights validation failed.")
+
     # sm.group_securities()
     # sm.print_grouped_securities()
 

@@ -11,7 +11,7 @@ class ExcelReader:
         current_tickers = set()
 
         for sheet_name in xls.sheet_names:
-            df = pd.read_excel(xls, sheet_name=sheet_name, usecols=['Ticker', 'Sub Category'])
+            df = pd.read_excel(xls, sheet_name=sheet_name, usecols=['Ticker', 'Sub Category', 'Sub Category Risk Weight'])
             df = df.dropna(subset=['Ticker'])
 
             if df.empty:
@@ -19,7 +19,12 @@ class ExcelReader:
                 continue
 
             securities = df.apply(
-                lambda row: (row['Ticker'], row['Sub Category'] if pd.notna(row['Sub Category']) else None, sheet_name),
+                lambda row: (
+                    row['Ticker'],
+                    row['Sub Category'] if pd.notna(row['Sub Category']) else None,
+                    sheet_name,
+                    row['Sub Category Risk Weight'] if pd.notna(row['Sub Category Risk Weight']) else None
+                ),
                 axis=1)
             self.all_category.add_securities(securities.tolist())
             current_tickers.update(df['Ticker'])

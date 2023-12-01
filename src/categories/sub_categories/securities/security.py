@@ -42,9 +42,10 @@ class Security:
             print(f"Error fetching risk-free rate: {e}")
             return None
 
-    def __init__(self, ticker, sub_category):
+    def __init__(self, ticker, sub_category, sub_category_weight):
         self.__ticker = ticker
         self.__sub_category = sub_category
+        self.__sub_category_weight = sub_category_weight / 100
         self.__etf = yq.Ticker(self.__ticker)
         self.__name = None
         self.__category_name = None
@@ -309,6 +310,10 @@ class Security:
     @property
     def sub_category(self):
         return self.__sub_category
+
+    @property
+    def sub_category_weight(self):
+        return self.__sub_category_weight
 
     @property
     def name(self):

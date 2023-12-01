@@ -1,6 +1,6 @@
 from categories.category import Category
 from categories.sub_categories.securities.security import Security
-
+import numpy as np
 
 class AllCategory:
     def __init__(self):
@@ -19,10 +19,23 @@ class AllCategory:
         subcategory.add_security(security)
 
     def add_securities(self, securities):
-        for ticker, subcategory_name, category_name in securities:
+        for ticker, subcategory_name, category_name, sub_category_weight in securities:
             category = self.find_or_create_category(category_name)
             subcategory = category.find_or_create_subcategory(subcategory_name)
-            category.add_security_to_subcategory(Security(ticker, subcategory_name), subcategory_name)
+            category.add_security_to_subcategory(Security(ticker, subcategory_name, sub_category_weight), subcategory_name)
 
     def remove_securities(self, tickers_to_remove):
         pass
+
+    def check_subcategory_weights(self):
+        for category in self.categories:
+            for subcategory in category.subcategories:
+                total_weight = sum(security.sub_category_weight for security in subcategory.securities if
+                                   security.sub_category_weight is not None)
+
+                # Check if the total weight is approximately 1 (100%)
+                if not np.isclose(total_weight, 1, atol=0.01):
+                    raise ValueError(
+                        f"Total weight in sub-category '{subcategory.name}' of category '{category.name}' is not 1 (100%). It's {total_weight * 100:.2f}%.")
+
+        return True  # Only returns True if all checks pass
