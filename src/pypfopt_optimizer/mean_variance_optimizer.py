@@ -4,11 +4,20 @@ class MeanVarianceOptimizer:
     def __init__(self):
         pass
 
-    def mean_historical_returns(self, prices):
+    def mean_historical_returns_by_prices(self, prices):
         return expected_returns.mean_historical_return(prices)
 
-    def covariance_correlation_matrix(self, prices, method = 'ledoit_wolf'):
+    def mean_historical_returns_by_returns(self, returns):
+        return expected_returns.mean_historical_return(returns, returns_data=True)
+
+    def covariance_correlation_matrix_by_prices(self, prices, method='ledoit_wolf'):
         covariance = risk_models.risk_matrix(prices, method=method)
+        correlation = risk_models.cov_to_corr(covariance)
+
+        return covariance, correlation
+
+    def covariance_correlation_matrix_by_returns(self, returns, method='ledoit_wolf'):
+        covariance = risk_models.risk_matrix(returns, returns_data=True, method=method)
         correlation = risk_models.cov_to_corr(covariance)
 
         return covariance, correlation

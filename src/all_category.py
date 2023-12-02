@@ -71,3 +71,13 @@ class AllCategory:
             for subcategory in category.subcategories:
                 print(f"  Sub-Category: {subcategory.name}")
                 print(subcategory.calculate_aggregated_returns().to_string())
+
+    def print_sub_category_aggregated_returns_in_dataframe(self):
+        for category in self.categories:
+            print(f"Category: {category.name}")
+            print(category.create_returns_dataframe().to_string())
+
+    def optimize_sub_category(self):
+        for category in self.categories:
+            print(f"Category: {category.name}")
+            category.optimize()

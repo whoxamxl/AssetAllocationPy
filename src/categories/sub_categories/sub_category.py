@@ -9,6 +9,7 @@ class SubCategory:
         self.name = name
         self.securities = []
         self.__aggregated_returns = None
+        self.__sub_category_weight = None
 
     def add_security(self, security):
         if isinstance(security, Security):
@@ -66,3 +67,12 @@ class SubCategory:
             self.__aggregated_returns = self.calculate_aggregated_returns()
         return self.__aggregated_returns
 
+    @property
+    def sub_category_weight(self):
+        return self.__sub_category_weight
+
+    @sub_category_weight.setter
+    def sub_category_weight(self, weight):
+        if weight < 0 or weight > 1:
+            raise ValueError("Sub-category weight must be between 0 and 1")
+        self.__sub_category_weight = weight
