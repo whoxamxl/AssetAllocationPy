@@ -58,3 +58,16 @@ class AllCategory:
                     asset_weight = security.sub_asset_weight  # assuming this is an attribute in Security
                     print(f"    Security: {ticker}, Risk Weight: {risk_weight}, Asset Weight: {asset_weight}")
 
+    def print_sub_category_returns_in_series(self):
+        for category in self.categories:
+            print(f"Category: {category.name}")
+            for subcategory in category.subcategories:
+                print(f"  Sub-Category: {subcategory.name}")
+                print(subcategory.create_returns_dataframe().to_string())
+
+    def print_sub_category_aggregated_returns_in_series(self):
+        for category in self.categories:
+            print(f"Category: {category.name}")
+            for subcategory in category.subcategories:
+                print(f"  Sub-Category: {subcategory.name}")
+                print(subcategory.calculate_aggregated_returns().to_string())

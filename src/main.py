@@ -56,9 +56,9 @@ if __name__ == '__main__':
         raise ValueError("Sub-category weights validation failed.")
 
     ac.assign_asset_weights_to_subcategories()
-    ac.print_security_weight_details()
-
-
+    # ac.print_security_weight_details()
+    # ac.print_sub_category_returns_in_series()
+    ac.print_sub_category_aggregated_returns_in_series()
     # sm.group_securities()
     # sm.print_grouped_securities()
 
