@@ -4,17 +4,21 @@ import numpy as np
 from functools import lru_cache
 from retrying import retry
 
+
 class DataFetchError(Exception):
     """ Custom exception for data fetch errors """
     pass
+
 
 class NaNDataError(DataFetchError):
     """ Exception raised when data has too many NaN values """
     pass
 
+
 class DuplicatedDataError(DataFetchError):
     """ Exception raised when data has too many duplicated values """
     pass
+
 
 class Security:
     TBILL_3MONTHS = "^IRX"
@@ -42,10 +46,11 @@ class Security:
             print(f"Error fetching risk-free rate: {e}")
             return None
 
-    def __init__(self, ticker, sub_category, sub_category_weight):
+    def __init__(self, ticker, sub_category, sub_risk_weight):
         self.__ticker = ticker
         self.__sub_category = sub_category
-        self.__sub_category_weight = sub_category_weight / 100
+        self.__sub_risk_weight = sub_risk_weight / 100
+        self.__sub_asset_weight = None
         self.__etf = yq.Ticker(self.__ticker)
         self.__name = None
         self.__category_name = None
@@ -312,8 +317,12 @@ class Security:
         return self.__sub_category
 
     @property
-    def sub_category_weight(self):
-        return self.__sub_category_weight
+    def sub_risk_weight(self):
+        return self.__sub_risk_weight
+
+    @property
+    def sub_asset_weight(self):
+        return self.__sub_asset_weight
 
     @property
     def name(self):
@@ -402,3 +411,9 @@ class Security:
     @property
     def asset_weight(self):
         return self.__asset_weight
+
+    @sub_asset_weight.setter
+    def sub_asset_weight(self, weight):
+        if weight < 0:
+            raise ValueError("Weight cannot be negative")
+        self.__sub_asset_weight = weight

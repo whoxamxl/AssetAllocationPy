@@ -20,7 +20,7 @@ class ExcelWriter:
                         securities_data.append({
                             'Ticker': security.ticker,
                             'Sub Category': security.sub_category,
-                            'Sub Category Risk Weight': round(security.sub_category_weight * 100, 2),
+                            'Sub Category Risk Weight': round(security.sub_risk_weight * 100, 2),
                             'Name': security.name,
                             'Category Name': security.category_name,
                             'Exchange Name': security.exchange_name,

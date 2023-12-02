@@ -47,13 +47,17 @@ def plot_returns(returns_filled_df):
 
 if __name__ == '__main__':
     # sm = SecurityManager()
-    al = AllCategory()
+    ac = AllCategory()
     file_path = "ETF.xlsx"
-    er = ExcelReader(file_path, al)
+    er = ExcelReader(file_path, ac)
     er.read_and_update_securities()
     # Check sub-category weights
-    if not al.check_subcategory_weights():
+    if not ac.check_subcategory_weights():
         raise ValueError("Sub-category weights validation failed.")
+
+    ac.assign_asset_weights_to_subcategories()
+    ac.print_security_weight_details()
+
 
     # sm.group_securities()
     # sm.print_grouped_securities()
@@ -99,6 +103,6 @@ if __name__ == '__main__':
     # plot_returns(sm.aggregate_returns_in_series())
 
 
-    ew = ExcelWriter(file_path, al)
+    ew = ExcelWriter(file_path, ac)
     ew.update_excel()
 
