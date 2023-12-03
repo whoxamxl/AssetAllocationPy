@@ -1,6 +1,8 @@
 import pandas as pd
 
+from categories.sub_categories.securities.security import Security
 from categories.sub_categories.sub_category import SubCategory
+from constraints import SUB_CATEGORY_CONSTRAINTS
 from fill_nan_dataframe_knn import fill_nan_dataframe_knn
 from pypfopt_optimizer.mean_variance_optimizer import MeanVarianceOptimizer
 
@@ -40,7 +42,6 @@ class Category:
 
         return rounded_dataframe
 
-    # TODO: Check optimization
     def optimize(self):
         returns_df = self.sub_category_df
 
@@ -48,7 +49,7 @@ class Category:
         expected_returns = mvo.mean_historical_returns_by_returns(returns_df)
         covariance, correlation = mvo.covariance_correlation_matrix_by_returns(returns_df)
 
-        cleaned_weights, portfolio_metrics = mvo.optimize_max_sharpe_ratio(expected_returns, covariance)
+        cleaned_weights, portfolio_metrics = mvo.optimize_max_sharpe_ratio(expected_returns, covariance, constraints_dict=SUB_CATEGORY_CONSTRAINTS.get(self.name))
 
         for subcategory in self.subcategories:
             try:
@@ -73,8 +74,8 @@ class Category:
 
         return cleaned_weights
 
-    # TODO: Check aggregated data
     def calculate_aggregated_returns(self):
+        self.optimize()
         filled_returns_df = self.sub_category_df
 
         # Initialize an empty Series to store aggregated returns

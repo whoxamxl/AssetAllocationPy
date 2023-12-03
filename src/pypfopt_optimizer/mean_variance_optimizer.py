@@ -50,6 +50,7 @@ class MeanVarianceOptimizer:
                                                                                           risk_free_rate=risk_free_rate)
         print(
             f"Expected Annual Return: {round(expected_annual_return * 100, 2)}% Annual Volatility: {round(annual_volatility * 100, 2)}% Sharpe Ratio: {round(sharp_ratio, 2)}")
+        print("--------------------------------------------------")
         portfolio_metrics = {
             "Expected Annual Return": expected_annual_return,
             "Annual Volatility": annual_volatility,

@@ -60,9 +60,11 @@ if __name__ == '__main__':
     # ac.print_sub_category_returns_in_series()
     # ac.print_sub_category_aggregated_returns_in_series()
     # ac.print_sub_category_aggregated_returns_in_dataframe()
-    ac.optimize_sub_category()
+    # ac.optimize_sub_category()
+    ac.optimize()
 
-    optimizer = MeanVarianceOptimizer()
+
+    # optimizer = MeanVarianceOptimizer()
 
     print(f"Risk Free Rate: {Security.get_risk_free_rate() * 100}%")
     # adc = AggregatedDataCalculator()

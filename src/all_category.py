@@ -1,11 +1,18 @@
+import pandas as pd
+
 from categories.category import Category
 from categories.sub_categories.securities.security import Security
 import numpy as np
+
+from constraints import CATEGORY_CONSTRAINTS
+from fill_nan_dataframe_knn import fill_nan_dataframe_knn
+from pypfopt_optimizer.mean_variance_optimizer import MeanVarianceOptimizer
 
 
 class AllCategory:
     def __init__(self):
         self.categories = []
+        self.__category_df = None
 
     def find_or_create_category(self, category_name):
         category = next((cat for cat in self.categories if cat.name == category_name), None)
@@ -81,3 +88,54 @@ class AllCategory:
         for category in self.categories:
             print(f"Category: {category.name}")
             category.optimize()
+
+    def create_returns_dataframe(self):
+        returns_df = pd.DataFrame()
+
+        for category in self.categories:
+            if category.aggregated_returns is not None:
+                returns_df[category.name] = category.aggregated_returns
+
+        filled_dataframe = fill_nan_dataframe_knn(returns_df)
+
+        rounded_dataframe = filled_dataframe.round(5)
+
+        return rounded_dataframe
+
+    def optimize(self):
+        returns_df = self.category_df
+
+        mvo = MeanVarianceOptimizer()
+        expected_returns = mvo.mean_historical_returns_by_returns(returns_df)
+        covariance, correlation = mvo.covariance_correlation_matrix_by_returns(returns_df)
+
+        cleaned_weights, portfolio_metrics = mvo.optimize_max_sharpe_ratio(expected_returns, covariance, constraints_dict=CATEGORY_CONSTRAINTS)
+
+        for category in self.categories:
+            try:
+                if category.name not in cleaned_weights:
+                    # Raise an error if the category name doesn't match any key in cleaned_weight
+                    raise KeyError(f"No matching weight found for category '{category.name}'.")
+
+                weight = cleaned_weights.get(category.name)
+                if weight is None:
+                    raise ValueError(f"Weight not found for category: {category.name}")
+
+                category.category_weight = weight
+            except KeyError as e:
+                print(f"KeyError: {e}")
+                raise
+            except ValueError as e:
+                print(f"Error setting weight for {category.name}: {e}")
+                raise
+            except Exception as e:
+                print(f"Unexpected error occurred while setting weight for {category.name}: {e}")
+                raise
+
+        return cleaned_weights
+
+    @property
+    def category_df(self):
+        if self.__category_df is None:
+            self.__category_df = self.create_returns_dataframe()
+        return self.__category_df
