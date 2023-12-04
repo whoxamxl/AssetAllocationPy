@@ -16,7 +16,7 @@ class MeanVarianceOptimizer:
 
         return covariance, correlation
 
-    def covariance_correlation_matrix_by_returns(self, returns, method='ledoit_wolf'):
+    def covariance_correlation_matrix_by_returns(self, returns, method='oracle_approximating'):
         covariance = risk_models.risk_matrix(returns, returns_data=True, method=method)
         correlation = risk_models.cov_to_corr(covariance)
 

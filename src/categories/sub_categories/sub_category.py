@@ -45,6 +45,7 @@ class SubCategory:
 
         return rounded_dataframe
 
+    # TODO: sub_asset_weight -> sub_risk_weight
     def calculate_aggregated_returns(self):
         filled_returns_df = self.create_returns_dataframe()
 

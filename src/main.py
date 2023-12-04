@@ -52,10 +52,7 @@ if __name__ == '__main__':
     er = ExcelReader(file_path, ac)
     er.read_and_update_securities()
     # Check sub-category weights
-    if not ac.check_subcategory_weights():
-        raise ValueError("Sub-category weights validation failed.")
 
-    ac.assign_asset_weights_to_subcategories()
     # ac.print_security_weight_details()
     # ac.print_sub_category_returns_in_series()
     # ac.print_sub_category_aggregated_returns_in_series()
@@ -64,9 +61,13 @@ if __name__ == '__main__':
     ac.optimize()
 
 
+
     # optimizer = MeanVarianceOptimizer()
 
     print(f"Risk Free Rate: {Security.get_risk_free_rate() * 100}%")
+
+    ac.assign_final_asset_weights()
+
     # adc = AggregatedDataCalculator()
     # csm = CategorySecurityManager()
     # for categories in sm.grouped_securities:

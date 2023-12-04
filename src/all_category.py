@@ -7,6 +7,7 @@ import numpy as np
 from constraints import CATEGORY_CONSTRAINTS
 from fill_nan_dataframe_knn import fill_nan_dataframe_knn
 from pypfopt_optimizer.mean_variance_optimizer import MeanVarianceOptimizer
+from riskfolio_optimizer.mean_risk_optimizer import MeanRiskOptimizer
 
 
 class AllCategory:
@@ -109,7 +110,10 @@ class AllCategory:
         expected_returns = mvo.mean_historical_returns_by_returns(returns_df)
         covariance, correlation = mvo.covariance_correlation_matrix_by_returns(returns_df)
 
-        cleaned_weights, portfolio_metrics = mvo.optimize_max_sharpe_ratio(expected_returns, covariance, constraints_dict=CATEGORY_CONSTRAINTS)
+        cleaned_weights, portfolio_metrics = mvo.optimize_max_sharpe_ratio(expected_returns, covariance, risk_free_rate=Security.get_risk_free_rate(), constraints_dict=CATEGORY_CONSTRAINTS)
+
+        # mro = MeanRiskOptimizer()
+        # mro.optimize(returns_df, risk_free_rate=0, plot=True)
 
         for category in self.categories:
             try:
@@ -133,6 +137,36 @@ class AllCategory:
                 raise
 
         return cleaned_weights
+
+    def optimize_with_subcategory(self):
+        returns_df = pd.DataFrame()
+
+        for category in self.categories:
+            for subcategory in category.subcategories:
+                returns_df[subcategory.name] = subcategory.aggregated_returns
+
+        filled_dataframe = fill_nan_dataframe_knn(returns_df)
+
+        # Round all numbers in the DataFrame to 5 decimal places
+        rounded_dataframe = filled_dataframe.round(5)
+
+        mvo = MeanVarianceOptimizer()
+        expected_returns = mvo.mean_historical_returns_by_returns(rounded_dataframe)
+        covariance, correlation = mvo.covariance_correlation_matrix_by_returns(rounded_dataframe)
+
+        cleaned_weights, portfolio_metrics = mvo.optimize_max_sharpe_ratio(expected_returns, covariance, risk_free_rate=Security.get_risk_free_rate())
+
+
+        return cleaned_weights
+
+    def assign_final_asset_weights(self):
+        for category in self.categories:
+            for subcategory in category.subcategories:
+                for security in subcategory.securities:
+                    final_weight = (security.sub_asset_weight *
+                                    subcategory.sub_category_weight *
+                                    category.category_weight)
+                    security.portfolio_asset_weight = final_weight
 
     @property
     def category_df(self):

@@ -20,7 +20,7 @@ class ExcelWriter:
                         securities_data.append({
                             'Ticker': security.ticker,
                             'Sub Category': security.sub_category,
-                            'Sub Category Risk Weight': round(security.sub_risk_weight * 100, 2),
+                            'Sub Category Asset Weight': round(security.sub_asset_weight * 100, 2),
                             'Name': security.name,
                             'Category Name': security.category_name,
                             'Exchange Name': security.exchange_name,
@@ -33,7 +33,7 @@ class ExcelWriter:
                             'Downside Deviation': round(security.downside_deviation_5y * 100, 2),
                             'Value at Risk 95%': round(security.var_95 * 100, 2),
                             'Sharpe Ratio': security.sharpe_ratio,
-                            'Asset Weight': security.asset_weight,
+                            'Portfolio Asset Weight': round(security.portfolio_asset_weight * 100, 2),
                         })
 
                 if securities_data:
