@@ -34,6 +34,7 @@ class ExcelWriter:
                             'Value at Risk 95%': round(security.var_95 * 100, 2),
                             'Sharpe Ratio': security.sharpe_ratio,
                             'Portfolio Asset Weight': round(security.portfolio_asset_weight * 100, 2),
+                            'Portfolio Asset Allocation': round(security.portfolio_asset_allocation, 2)
                         })
 
                 if securities_data:

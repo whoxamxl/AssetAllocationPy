@@ -17,5 +17,7 @@ CATEGORY_CONSTRAINTS = {
     "Alternative_max": 0.2,
 }
 
-#RISK_FREE_RATE = None -> Automatically fetch T-Bill 3 Month rate
+# RISK_FREE_RATE = None -> Automatically fetch T-Bill 3 Month rate
 RISK_FREE_RATE = 0.02
+
+TOTAL_PORTFOLIO_VALUE = 10000

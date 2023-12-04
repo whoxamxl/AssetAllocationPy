@@ -4,7 +4,7 @@ import numpy as np
 from functools import lru_cache
 from retrying import retry
 
-from src.global_settings import RISK_FREE_RATE
+from src.global_settings import RISK_FREE_RATE, TOTAL_PORTFOLIO_VALUE
 
 
 class DataFetchError(Exception):
@@ -71,6 +71,7 @@ class Security:
         self.__var_95 = None
         self.__sharpe_ratio = None
         self.__portfolio_asset_weight = None
+        self.__portfolio_asset_allocation = None
 
     def __fetch_name(self):
         try:
@@ -411,6 +412,13 @@ class Security:
     @property
     def portfolio_asset_weight(self):
         return self.__portfolio_asset_weight
+
+    @property
+    def portfolio_asset_allocation(self):
+        if self.__portfolio_asset_allocation is None:
+            if self.portfolio_asset_weight is not None:
+                self.__portfolio_asset_allocation = TOTAL_PORTFOLIO_VALUE * self.portfolio_asset_weight
+        return self.__portfolio_asset_allocation
 
     @portfolio_asset_weight.setter
     def portfolio_asset_weight(self, weight):
