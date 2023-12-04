@@ -1,10 +1,10 @@
 import pandas as pd
 
-from categories.sub_categories.securities.security import Security
-from categories.sub_categories.sub_category import SubCategory
-from constraints import SUB_CATEGORY_CONSTRAINTS
-from fill_nan_dataframe_knn import fill_nan_dataframe_knn
-from pypfopt_optimizer.mean_variance_optimizer import MeanVarianceOptimizer
+from src.categories.sub_categories.securities.security import Security
+from src.categories.sub_categories.sub_category import SubCategory
+from src.fill_nan_dataframe_knn import fill_nan_dataframe_knn
+from src.global_settings import SUB_CATEGORY_CONSTRAINTS
+from src.pypfopt_optimizer.mean_variance_optimizer import MeanVarianceOptimizer
 
 
 class Category:
@@ -49,7 +49,7 @@ class Category:
         expected_returns = mvo.mean_historical_returns_by_returns(returns_df)
         covariance, correlation = mvo.covariance_correlation_matrix_by_returns(returns_df)
 
-        cleaned_weights, portfolio_metrics = mvo.optimize_max_sharpe_ratio(expected_returns, covariance, constraints_dict=SUB_CATEGORY_CONSTRAINTS.get(self.name))
+        cleaned_weights, portfolio_metrics = mvo.optimize_max_sharpe_ratio(expected_returns, covariance, risk_free_rate=Security.get_risk_free_rate(), constraints_dict=SUB_CATEGORY_CONSTRAINTS.get(self.name))
 
         for subcategory in self.subcategories:
             try:

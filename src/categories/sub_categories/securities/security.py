@@ -4,6 +4,8 @@ import numpy as np
 from functools import lru_cache
 from retrying import retry
 
+from src.global_settings import RISK_FREE_RATE
+
 
 class DataFetchError(Exception):
     """ Custom exception for data fetch errors """
@@ -29,7 +31,10 @@ class Security:
     @classmethod
     def get_risk_free_rate(cls):
         if cls._risk_free_rate is None:
-            cls._risk_free_rate = cls.__fetch_risk_free_rate(cls.TBILL_3MONTHS)
+            if RISK_FREE_RATE is None:
+                cls._risk_free_rate = cls.__fetch_risk_free_rate(cls.TBILL_3MONTHS)
+            else:
+                cls._risk_free_rate = RISK_FREE_RATE
         return cls._risk_free_rate
 
     @classmethod

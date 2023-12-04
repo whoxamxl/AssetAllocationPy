@@ -1,7 +1,7 @@
-from categories.sub_categories.securities.security import Security
 import pandas as pd
 
-from fill_nan_dataframe_knn import fill_nan_dataframe_knn
+from src.categories.sub_categories.securities.security import Security
+from src.fill_nan_dataframe_knn import fill_nan_dataframe_knn
 
 
 class SubCategory:

@@ -1,13 +1,13 @@
 import pandas as pd
 
 from categories.category import Category
-from categories.sub_categories.securities.security import Security
 import numpy as np
 
-from constraints import CATEGORY_CONSTRAINTS
+from global_settings import CATEGORY_CONSTRAINTS
 from fill_nan_dataframe_knn import fill_nan_dataframe_knn
 from pypfopt_optimizer.mean_variance_optimizer import MeanVarianceOptimizer
 from riskfolio_optimizer.mean_risk_optimizer import MeanRiskOptimizer
+from src.categories.sub_categories.securities.security import Security
 
 
 class AllCategory:
