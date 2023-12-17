@@ -4,7 +4,7 @@ import numpy as np
 from functools import lru_cache
 from retrying import retry
 
-from src.global_settings import RISK_FREE_RATE, TOTAL_PORTFOLIO_VALUE
+from src.global_settings import RISK_FREE_RATE, TOTAL_PORTFOLIO_VALUE, DIVIDEND_TYPE
 
 
 class DataFetchError(Exception):
@@ -291,9 +291,10 @@ class Security:
             if len(daily_returns) == 0:
                 raise ValueError("No daily returns data available for calculation")
 
-            dividend_yield = self.dividend_yield
+            dividend_yield = self.avg_dividend_yield if DIVIDEND_TYPE == "avg" else self.dividend_yield
             if dividend_yield is None:
                 raise ValueError("Dividend yield data is missing")
+
 
             adjusted_daily_returns = daily_returns + (dividend_yield / 252)
             return round(adjusted_daily_returns, 5)
