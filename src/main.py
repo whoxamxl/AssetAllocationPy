@@ -58,6 +58,7 @@ if __name__ == '__main__':
     # ac.print_sub_category_aggregated_returns_in_series()
     # ac.print_sub_category_aggregated_returns_in_dataframe()
     # ac.optimize_sub_category()
+    ac.print_security_average_dividend_yield()
     ac.optimize()
 
 

@@ -27,6 +27,7 @@ class ExcelWriter:
                             'Traded Currency': security.traded_currency,
                             'Expense Ratio': round(security.expense_ratio * 100, 4),
                             'Dividend Yield': round(security.dividend_yield * 100, 2),
+                            'Average Dividend Yield': round(security.avg_dividend_yield * 100, 2),
                             'Simple Return': round(security.geometric_mean_5y * 100, 2),
                             'Total Return': round(security.adjusted_geometric_mean_5y * 100, 2),
                             'Standard Deviation': round(security.standard_deviation_5y * 100, 2),

@@ -62,6 +62,7 @@ class Security:
         self.__traded_currency = None
         self.__expense_ratio = None
         self.__dividend_yield = None
+        self.__avg_dividend_yield = None
         self.__historical_data = None
         self.__geometric_mean_5y = None
         self.__adjusted_geometric_mean_5y = None
@@ -132,19 +133,78 @@ class Security:
 
     def __fetch_dividend_yield(self):
         try:
-            dividend_yield = self.__etf.summary_detail.get(self.__ticker, {}).get("dividendYield")
-            if dividend_yield is None:
-                dividend_yield = self.__etf.summary_detail.get(self.__ticker, {}).get("yield")
-            if dividend_yield is not None and not isinstance(dividend_yield, str):
-                try:
-                    return round(float(dividend_yield), 5)
-                except (TypeError, ValueError):
-                    print(f"Dividend yield value for {self.__ticker} is not a valid number.")
-                    return None
+            summary_detail = self.__etf.summary_detail.get(self.__ticker, {})
+            # print(f"{self.__ticker}: {summary_detail}")
+            if isinstance(summary_detail, dict):
+                dividend_yield = summary_detail.get("dividendYield")
+                if dividend_yield is None:
+                    dividend_yield = summary_detail.get("yield")
+                if dividend_yield is not None and not isinstance(dividend_yield, str):
+                    try:
+                        dividend_yield = round(float(dividend_yield), 5)
+                        # print(f"Fetched dividend yield for {self.__ticker}: {dividend_yield}")
+                        return dividend_yield
+                    except (TypeError, ValueError):
+                        print(f"Dividend yield value for {self.__ticker} is not a valid number.")
+                        return None
+                else:
+                    return 0
             return None
         except Exception as e:
             print(f"Error fetching dividend yield for {self.__ticker}: {e}")
             return None
+
+    def __fetch_dividends_history(self):
+        try:
+            historical_data = self.__check_historical_data()
+            # Extract the first date from the historical_data DataFrame
+            start_date = historical_data.index.min()
+
+            # Convert the date to the required format (yyyy-mm-dd)
+            start_date_str = start_date.strftime('%Y-%m-%d')
+
+            # Use this date to obtain the dividend history
+            dividends_history = self.__etf.dividend_history(start_date_str)
+
+            # Check if dividends_history is empty
+            if dividends_history.empty:
+                return 0.0
+
+            # Reset the index of dividends_history to make 'date' a column
+            dividends_history.reset_index(inplace=True)
+
+            # Ensure 'date' column is in the correct format
+            dividends_history['date'] = pd.to_datetime(dividends_history['date'])
+            # print(dividends_history)
+
+            # Resample the historical data to get the year-end prices
+            yearly_prices = historical_data.resample('Y').last()
+            # print(yearly_prices)
+
+            # Calculate the total annual dividends
+            dividends_history['year'] = pd.to_datetime(dividends_history['date']).dt.year
+            total_dividends_per_year = dividends_history.groupby('year')['dividends'].sum()
+            # print(total_dividends_per_year)
+
+            # Convert the index of yearly_prices to just the year (as integers)
+            yearly_prices.index = yearly_prices.index.year
+
+            # Ensure both series are aligned by year
+            aligned_years = set(total_dividends_per_year.index).intersection(set(yearly_prices.index))
+            total_dividends_per_year = total_dividends_per_year[total_dividends_per_year.index.isin(aligned_years)]
+            yearly_prices = yearly_prices[yearly_prices.index.isin(aligned_years)]
+
+            # Calculate the dividend yields
+            dividend_yields = total_dividends_per_year / yearly_prices
+
+            # Calculate the average dividend yield
+            average_dividend_yield = dividend_yields.mean()
+
+            return round(average_dividend_yield, 5)
+        except Exception as e:
+            print(f"Error in calculating average dividend yield for {self.__ticker}: {e}")
+            return None
+
 
     def __is_data_valid(self, data, ticker):
         # Check for a significant amount of NaN values
@@ -360,6 +420,12 @@ class Security:
         if self.__dividend_yield is None:
             self.__dividend_yield = self.__fetch_dividend_yield()
         return self.__dividend_yield
+
+    @property
+    def avg_dividend_yield(self):
+        if self.__avg_dividend_yield is None:
+            self.__avg_dividend_yield = self.__fetch_dividends_history()
+        return self.__avg_dividend_yield
 
     @property
     def historical_data(self):
