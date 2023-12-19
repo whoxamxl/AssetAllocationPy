@@ -3,7 +3,7 @@ SUB_CATEGORY_CONSTRAINTS = {
         "Traditional Equity_min": 0.6,
     },
     "Bond": {
-
+        "Traditional Bond_min": 0.7,
     },
     "Alternative": {
         "Metal_min": 0.3,

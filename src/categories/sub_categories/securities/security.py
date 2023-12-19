@@ -73,6 +73,7 @@ class Security:
         self.__sharpe_ratio = None
         self.__portfolio_asset_weight = None
         self.__portfolio_asset_allocation = None
+        self.__number_of_shares = None
 
     def __fetch_name(self):
         try:
@@ -374,6 +375,15 @@ class Security:
             print(f"Error in calculating Sharpe ratio for {self.__ticker}: {e}")
             return None
 
+    def __calculate_number_of_shares(self):
+        try:
+            historical_data = self.__check_historical_data()
+            last_price = historical_data.iloc[-1]
+            return round(self.portfolio_asset_allocation / last_price, 2)
+        except Exception as e:
+            print(f"Error in calculating number of shares for {self.__ticker}: {e}")
+            return None
+
     @property
     def ticker(self):
         return self.__ticker
@@ -486,6 +496,12 @@ class Security:
             if self.portfolio_asset_weight is not None:
                 self.__portfolio_asset_allocation = TOTAL_PORTFOLIO_VALUE * self.portfolio_asset_weight
         return self.__portfolio_asset_allocation
+
+    @property
+    def number_of_shares(self):
+        if self.__number_of_shares is None:
+            self.__number_of_shares = self.__calculate_number_of_shares()
+        return self.__number_of_shares
 
     @portfolio_asset_weight.setter
     def portfolio_asset_weight(self, weight):
